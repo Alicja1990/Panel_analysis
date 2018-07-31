@@ -1,3 +1,4 @@
+options(scipen = 100)
 setwd("C:/Users/Alicja/Documents/Doktorat/Rozprawa doktorska/Panel_analysis/Panel_analysis/Data")
 x <- read.csv2("mydata1_corrected.csv", as.is = T)
 
@@ -5,7 +6,7 @@ setwd("C:/Users/Alicja/Dropbox/Doktorat/Praca doktorska/Pobieranie_analizy")
 
 data_analizy_18 <- read.csv2("mydata1_corrected.csv", as.is = T)
 
-data_analizy_18[, c(20, 24:28)] <- apply(data_analizy_18[, c(20, 24:28)], 2, as.numeric)
+data_analizy_18[, c(20, 26:30)] <- apply(data_analizy_18[, c(20, 24:28)], 2, as.numeric)
 data_analizy_18$Od.kiedy1 <- as.Date(data_analizy_18$Od.kiedy1, format = "%d.%m.%Y")
 data_analizy_18$Od.kiedy2 <- as.Date(data_analizy_18$Od.kiedy2, format = "%d.%m.%Y")
 data_analizy_18$Od.kiedy3 <- as.Date(data_analizy_18$Od.kiedy3, format = "%d.%m.%Y")
@@ -55,5 +56,14 @@ colnames(data_18) <- c("Nazwa", "Nazwa.IZFiA", "OB", "TFI", "Data.utworzenia",
                          "mean_daily_log_rr", "std_daily_log_rr",  
                          "var_5", "var_95", "es", "eg", "Rok")
 panel.data <- rbind(data_17, data_18)
+panel.data$OZW <- gsub("%", "", panel.data$OZW)
+panel.data$Profil <- gsub("akcji ", "akcji", panel.data$Profil)
+panel.data$Profil <- gsub("dłużne ", "dłużne", panel.data$Profil)
+panel.data$Profil <- gsub("mieszane polskie", "mieszane", panel.data$Profil)
+panel.data$Profil <- gsub("mieszane ", "mieszane", panel.data$Profil)
+panel.data$Profil <- gsub("gotówkowe i pieniężne ", "pieniężne", panel.data$Profil)
+panel.data <- panel.data[!(panel.data$Profil == "inne" | panel.data$Profil == "rynku surowców"),]
 
+setwd("C:/Users/Alicja/Documents/Doktorat/Rozprawa doktorska/Panel_analysis/Panel_analysis/Data")
+write.csv2(panel.data, "Panel.data.csv")
 
