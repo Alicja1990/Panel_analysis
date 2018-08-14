@@ -1,40 +1,43 @@
-library(olsrr)
+library(plm)
 
 setwd("C:/Users/Alicja/Documents/Doktorat/Rozprawa doktorska/Panel_analysis/Data")
-x <- read.csv("pd.profile.csv", as.is = T)
+x <- read.csv("Panel.data.csv", as.is = T)
+x$Aktywa <- as.numeric(x$Aktywa)
+x$Profil_ad <- x$Profil
+x$Profil_ad[x$Profil_ad == ""] <- "mieszane"
+x$Profil_ad[x$Profil_ad == "absolutnej stopy zwrotu"] <- "akcjopodobne"
+x$Profil_ad[x$Profil_ad == "akcji"] <- "akcjopodobne"
+x$Profil_ad[x$Profil_ad == "dÅ‚uÅ¼ne"] <- "dluznopodobne"
+x$Profil_ad[x$Profil_ad == "pieniÄ™Å¼ne"] <- "dluznopodobne"
+x$Profil_ad[x$Profil_ad == "mieszane"] <- "akcjopodobne"
+x$Profil_ad[x$Profil_ad == "inne"] <- "akcjopodobne"
+x$Profil_ad[x$Profil_ad == "rynku surowcÃ³w"] <- "akcjopodobne"
+x$OZW[is.na(x$OZW)] <- 0
+x$OZW01 <- x$OZW
+x$OZW01[!(x$OZW01 == 0)] <- 1
+x$TER <- as.numeric(x$TER)
+x$OZN <- as.numeric(x$OZN)
 
-x$Aktywa18 <- as.numeric(gsub(",", ".", x$Aktywa18))
-x$zm.akt.17.18.proc <- as.numeric(gsub(",", ".", x$zm.akt.17.18.proc))
-x$zm.akt.17.18.flow.proc <- as.numeric(gsub(",", ".", x$zm.akt.17.18.flow.proc))
-x$Wiek <- as.numeric(gsub(",", ".", x$Wiek))
-x$sr16 <- as.numeric(gsub(",", ".", x$sr16))
-x$sr17 <- as.numeric(gsub(",", ".", x$sr17))
-x <- x[!is.na(x$yearly_rr_17),]
-x <- x[!is.na(x$yearly_std_17),]
-x <- x[!is.na(x$zm.akt.17.18.proc),]
-x <- x[!is.na(x$zm.akt.17.18.flow.proc),]
-x <- x[!is.na(x$es17),]
-x <- x[!is.na(x$eg17),]
-x <- x[!is.na(x$var17_5),]
-x <- x[!is.na(x$var17_95),]
-x <- x[!is.na(x$sr17),]
-x$Profil17[x$Profil17 == ""] <- "mieszane"
-x$Profil17[x$Profil17 == "absolutnej stopy zwrotu"] <- "akcjopodobne"
-x$Profil17[x$Profil17 == "akcji"] <- "akcjopodobne"
-x$Profil17[x$Profil17 == "d³u¿ne"] <- "d³u¿nopodobne"
-x$Profil17[x$Profil17 == "pieniê¿ne"] <- "d³u¿nopodobne"
-x$Profil17[x$Profil17 == "mieszane"] <- "akcjopodobne"
-x$Profil17[x$Profil17 == "inne"] <- "akcjopodobne"
 
-r <- lm(x$OB18 ~ x$yearly_rr_17 + x$yearly_std_17
-        + x$es17 + x$eg17 + x$Profil17 + x$Lokalizacja
-        + x$Aktywa18 + x$zm.akt.17.18.flow.proc
-        + x$PW17 + x$Wiek
-        + x$sr17 + x$var17_5 + x$var17_95, data = x)
+pd <- plm.data(x, indexes = c("Name_time", "Profil_ad"))
 
-ols_step_backward(r, details = F, prem = 0.05)
+pool <- plm(pd$OB ~ pd$yearly_rr + pd$yearly_std
+            + pd$es + pd$eg + pd$sr + pd$var_5 + pd$var_95
+            + pd$Profil_ad + pd$Lokalizacja + pd$TFI
+            + pd$Aktywa + pd$Wiek + pd$Rok
+            + pd$PW + pd$NW
+            + pd$OZZ + pd$OZN + pd$OZU + pd$TER + x$OZW01, 
+            data = pd, model = "pooling")
+summary(pool)
 
-s <- lm(x$OB18 ~ x$Profil17
-        + x$Aktywa18
-        + x$PW17 + x$Wiek
-        + x$eg17 + x$var17_5, data = x)
+lm <- plm(pd$OB ~ pd$yearly_rr + pd$yearly_std
+            + pd$es + pd$eg + pd$sr + pd$var_5 + pd$var_95
+            + pd$Profil_ad + pd$Lokalizacja + pd$TFI
+            + pd$Aktywa + pd$Wiek + pd$Rok
+            + pd$PW + pd$NW
+            + pd$OZZ + pd$OZN + pd$OZU + pd$TER + x$OZW01, 
+            data = x)
+
+
+
+plmtest(pool)

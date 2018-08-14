@@ -18,6 +18,8 @@ colnames(data_analizy_18)[names(data_analizy_18) == "Pierwsza_wplata"] <- "PW18"
 colnames(data_analizy_18)[names(data_analizy_18) == "Nastepna_wplata"] <- "NW18"
 data_analizy_18 <- data_analizy_18[!is.na(data_analizy_18$X1),]
 
+write.csv(data_analizy_18, "data_analizy_18.csv", row.names = F)
+
 data_stooq <- read.csv2("stooq_17_18.csv", as.is = T)
 data_analizy_18 <-  merge(data_analizy_18, data_stooq, by.x = 1, by.y = "name")
 data_analizy_18 <- data_analizy_18[, c("OZZ18", "OZN18", "OZU18", "OZW18", "TER18", "OB18", 
@@ -43,6 +45,7 @@ colnames(data_analizy_17)[names(data_analizy_17) == "Pierwsza_wplata"] <- "PW17"
 colnames(data_analizy_17)[names(data_analizy_17) == "Nastepna_wplata"] <- "NW17"
 colnames(data_analizy_17)[names(data_analizy_17) == "Typ"] <- "Profil17"
 
+write.csv(data_analizy_17, "data_analizy_17.csv", row.names = F)
 
 data <- merge(data_analizy_17, data_analizy_18, by = "Nazwa_IZFiA")
 
